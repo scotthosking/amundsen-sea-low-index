@@ -1,3 +1,3 @@
 # Amundsen Sea Low Index (v3)
 
-https://legacy.bas.ac.uk/data/absl/index.html
+https://www.bas.ac.uk/data/absl/index.html
