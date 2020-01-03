@@ -57,7 +57,7 @@ for i, p in enumerate(asli.columns):
     if i+1 == len(asli.columns):
         ax.legend(loc='lower right', prop={'size':8})
 
-plt.suptitle('ASL indices (v3)', fontsize=24)
+plt.suptitle('ASL indices (v3)', fontsize=16)
 
 # plt.tight_layout()
 plt.savefig('../asli_era5_v3_monthly_timeseries.png', dpi=100)
