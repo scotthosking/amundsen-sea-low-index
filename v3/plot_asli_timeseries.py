@@ -14,7 +14,29 @@ def hamming(ts):
     filt = np.convolve(hamm, ts, mode='same')
     return filt
 
-# Plot
+
+# Plot lon
+fig = plt.figure(figsize=(8, 4))
+
+col = asli['lon']
+ax = fig.add_subplot( 1, 1, 1)
+
+ax.plot(asli.index, col, color='grey', linewidth=0.8, label='monthly')
+ax.plot(asli.index[5:-5], hamming(col)[5:-5], color='black', linewidth=1.4, label='11-point Hamming')
+
+ax.set_title('Time series of monthly mean ASL longitude index (v3)')
+ax.set_xlabel('Time (years)')
+ax.set_ylabel('ASL longitude ($^\circ$E)')
+
+ax.legend(loc='lower right', prop={'size':8})
+
+plt.tight_layout()
+plt.savefig('asli_era5_v3_lon_monthly_timeseries.png', dpi=100)
+
+
+
+
+# Plot all timeseries
 fig = plt.figure(figsize=(8, 11))
 
 for i, p in enumerate(asli.columns):
