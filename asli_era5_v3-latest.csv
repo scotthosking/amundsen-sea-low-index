@@ -16,7 +16,7 @@
 #   ActCenPres = Actual central pressure of ASL
 #   lon        = Longitudinal location of ASL (degrees East)
 #   lat        = Latitudinal location of ASL
-#   RelCenPres = Relative central pressure (ActCenPres "minus" SectorPres)
+#   RelCenPres = Relative central pressure (ActCenPres 'minus' SectorPres)
 # 
 # The ASL (low pressure system) detection algorithm may be improved over time. Therefore 
 # it is recommended that the version number below is noted when using these data.

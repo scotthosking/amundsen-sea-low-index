@@ -105,9 +105,9 @@ def write_csv_with_header(df, header, version_id):
         version_id = version_id+'-TESTING'
 
     if header is 'asli':     
-        fname='v3/era5/asli_era5_v'+version_id+'.csv'
+        fname='era5/asli_era5_v'+version_id+'.csv'
     if header is 'all_lows': 
-        fname='v3/era5/all_lows_era5_v'+version_id+'.csv'
+        fname='era5/all_lows_era5_v'+version_id+'.csv'
 
     with open('csv_header_asli_v3.txt') as header_file:  
         lines = header_file.readlines()
