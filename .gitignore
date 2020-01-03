@@ -1,5 +1,5 @@
 Untitled.ipynb
 .ipynb_checkpoints/*.ipynb
 .DS_Store
-vs/era5/testing/*
+*.png
 *-TESTING.csv
