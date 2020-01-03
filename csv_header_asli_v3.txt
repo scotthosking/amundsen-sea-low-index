@@ -1,0 +1,25 @@
+
+Amundsen Sea Low (ASL) Index version 3
+  (derived from monthly ERA5 Reanalysis data)
+
+Dr J. Scott Hosking
+  British Antarctic Survey
+  Twitter: @scotthosking
+
+For more information see:
+  Website: https://scott-hosking.github.io/asl_index
+  GitHub:  https://github.com/scott-hosking/amundsen_sea_low_index
+
+Column Labels:
+  time       = YYYY-MM-01 (monthly data - as specified in ERA5)
+  SectorPres = Area-average sea level pressure over sector (170-298 E : 60-80 S)
+  ActCenPres = Actual central pressure of ASL
+  lon        = Longitudinal location of ASL (degrees East)
+  lat        = Latitudinal location of ASL
+  RelCenPres = Relative central pressure (ActCenPres "minus" SectorPres)
+
+The ASL (low pressure system) detection algorithm may be improved over time. Therefore 
+it is recommended that the version number below is noted when using these data.
+  ASLi_version_id = 3.XXXX
+
+END-OF-FILE
