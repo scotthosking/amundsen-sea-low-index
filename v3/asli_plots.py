@@ -53,8 +53,8 @@ da_mask = slice_region(da_mask, asl_region)
 da = da  / 100. 
 da = da.assign_attrs(units='hPa')
 
-all_lows_dfs = pd.read_csv('v3/era5/all_lows_era5_v'+version_id+'.csv', comment='#')
-asl_df       = pd.read_csv('v3/era5/asli_era5_v'+version_id+'.csv', comment='#')
+all_lows_dfs = pd.read_csv('era5/all_lows_era5_v'+version_id+'.csv', comment='#')
+asl_df       = pd.read_csv('era5/asli_era5_v'+version_id+'.csv', comment='#')
 
 for yr in range(1979,2019):
 
@@ -94,5 +94,5 @@ for yr in range(1979,2019):
 
         draw_regional_box(asl_region)
 
-    plt.savefig('v3/era5/testing/asli_v3_era5_'+str(yr)+'_'+version_id+'.png', dpi=150)
+    plt.savefig('era5/testing/asli_v3_era5_'+str(yr)+'_'+version_id+'.png', dpi=150)
     plt.close()
