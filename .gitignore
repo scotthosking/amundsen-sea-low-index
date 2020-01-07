@@ -1,5 +1,5 @@
 Untitled.ipynb
-.ipynb_checkpoints/*.ipynb
+*-checkpoints.ipynb
 .DS_Store
 v3/era5/testing/
 *-TESTING.*
