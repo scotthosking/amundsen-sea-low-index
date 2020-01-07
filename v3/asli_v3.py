@@ -4,9 +4,13 @@ import pandas as pd
 from datetime import datetime
 from skimage.feature import peak_local_max
 
+
+### era5, era-interim
+indata = 'era-interim'
+
 ### Update this as the ASL / low detection algorithm is updated
 ### version_id = 3.<DATE>
-version_id = '3.20200103' 
+version_id = '3.20200107-'+indata+'-TESTING' 
 
 
 
@@ -93,21 +97,22 @@ def define_asl(df, region):
     return df2
 
 
-def slice_region(da, region, boarder=5):
+def slice_region(da, region, boarder=3):
     da = da.sel( latitude=slice(region['north']+boarder,region['south']-boarder), 
                 longitude=slice(region['west']-boarder,region['east']+boarder))
     return da
 
 
-def write_csv_with_header(df, header, version_id):
+def write_csv_with_header(df, header, version_id, indata):
 
     if (len(all_lows_dfs.time.unique()) < 400):
-        version_id = version_id+'-TESTING'
+        if '-TESTING' not in version_id:
+            version_id = version_id+'-TESTING'
 
     if header is 'asli':     
-        fname='era5/asli_era5_v'+version_id+'.csv'
+        fname = indata+'/asli_v'+version_id+'.csv'
     if header is 'all_lows': 
-        fname='era5/all_lows_era5_v'+version_id+'.csv'
+        fname = indata+'/all_lows_v'+version_id+'.csv'
 
     with open('csv_header_asli_v3.txt') as header_file:  
         lines = header_file.readlines()
@@ -117,6 +122,7 @@ def write_csv_with_header(df, header, version_id):
             if (header is 'all_lows'):
                 line = line.replace('Amundsen Sea Low (ASL) Index version 3',
                                     'Detected lows within the Pacific sector of the Southern Ocean')
+            line = line.replace( '<SOURCE_DATA>', indata.upper() )
             line = line.replace('ASLi_version_id = 3.XXXX', 'ASLi_version_id = '+version_id)
             line = line.replace('END-OF-FILE','\n')
             file.write('# '+str(line))
@@ -131,8 +137,19 @@ def write_csv_with_header(df, header, version_id):
 # Analysis
 #---------------------------
 
-da   = xr.open_dataset('~/Desktop/era5_mean_sea_level_pressure_monthly.nc').msl
-mask = xr.open_dataset('~/Desktop/era5_invariant_lsm.nc').lsm.squeeze()
+
+if indata is 'era5':
+    root = '../INDATA/ERA5/'
+    da   = xr.open_mfdataset(root+'monthly/era5_mean_sea_level_pressure_monthly_*.nc').msl
+    mask = xr.open_dataset(root+'/era5_invariant_lsm.nc').lsm.squeeze()
+
+if indata is 'era-interim':
+    root = '../INDATA/ERAI/'
+    da   = xr.open_dataset(root+'/erai_sfc_monthly.nc').msl
+    mask = xr.open_dataset(root+'/erai_invariant.nc').lsm.squeeze()
+
+
+
 
 da_mask = da.where(mask == 0)
 
@@ -158,5 +175,5 @@ for t in range(0,ntime):
 asl_df = define_asl(all_lows_dfs, asl_region)
 
 ### Write CSV files
-write_csv_with_header( asl_df,       'asli',     version_id )
-write_csv_with_header( all_lows_dfs, 'all_lows', version_id )
+write_csv_with_header( asl_df,       'asli',     version_id, indata )
+write_csv_with_header( all_lows_dfs, 'all_lows', version_id, indata )
