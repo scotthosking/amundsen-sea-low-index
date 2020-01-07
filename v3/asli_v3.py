@@ -6,11 +6,11 @@ from skimage.feature import peak_local_max
 
 
 ### era5, era-interim
-indata = 'era-interim'
+indata = 'era5'
 
 ### Update this as the ASL / low detection algorithm is updated
 ### version_id = 3.<DATE>
-version_id = '3.20200107-'+indata+'-TESTING' 
+version_id = '3.20200107-'+indata # +'-TESTING' 
 
 
 
@@ -97,7 +97,7 @@ def define_asl(df, region):
     return df2
 
 
-def slice_region(da, region, boarder=3):
+def slice_region(da, region, boarder=8):
     da = da.sel( latitude=slice(region['north']+boarder,region['south']-boarder), 
                 longitude=slice(region['west']-boarder,region['east']+boarder))
     return da
@@ -137,6 +137,7 @@ def write_csv_with_header(df, header, version_id, indata):
 # Analysis
 #---------------------------
 
+print(indata)
 
 if indata is 'era5':
     root = '../INDATA/ERA5/'
