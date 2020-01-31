@@ -4,16 +4,12 @@ import pandas as pd
 from datetime import datetime
 from skimage.feature import peak_local_max
 
-
 ### era5, era-interim
 indata = 'era5'
 
 ### Update this as the ASL / low detection algorithm is updated
 ### version_id = 3.<DATE>
 version_id = '3.20200107-'+indata # +'-TESTING' 
-
-
-
 
 def asl_sector_mean(da, asl_region, mask):
     a = da.where(mask == 0).sel( latitude=slice(asl_region['north'],asl_region['south']), 
@@ -81,7 +77,6 @@ def get_lows(da, mask):
 
     return df
 
-
 def define_asl(df, region):
     ### select only those points within ASL box
     df2 = df[(df['lon'] > region['west'])  & 
@@ -96,12 +91,10 @@ def define_asl(df, region):
 
     return df2
 
-
 def slice_region(da, region, boarder=8):
     da = da.sel( latitude=slice(region['north']+boarder,region['south']-boarder), 
                 longitude=slice(region['west']-boarder,region['east']+boarder))
     return da
-
 
 def write_csv_with_header(df, header, version_id, indata):
 
@@ -129,14 +122,7 @@ def write_csv_with_header(df, header, version_id, indata):
 
         df.to_csv(file, index=False)
 
-
-
-
-
-#---------------------------
 # Analysis
-#---------------------------
-
 print(indata)
 
 if indata is 'era5':
@@ -148,9 +134,6 @@ if indata is 'era-interim':
     root = '../INDATA/ERAI/'
     da   = xr.open_dataset(root+'/erai_sfc_monthly.nc').msl
     mask = xr.open_dataset(root+'/erai_invariant.nc').lsm.squeeze()
-
-
-
 
 da_mask = da.where(mask == 0)
 
