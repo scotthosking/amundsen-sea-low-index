@@ -9,3 +9,5 @@ dependencies:
   - cartopy
   - scikit-image
   - cartopy
+  - dask
+  - netcdf4
