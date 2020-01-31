@@ -1,0 +1,12 @@
+name: asl-environment
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - pandas
+  - xarray
+  - datetime
+  - matplotlib
+  - cartopy
+  - scikit-image
+  - cartopy
