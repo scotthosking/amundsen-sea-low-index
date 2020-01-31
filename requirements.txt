@@ -2,6 +2,6 @@ numpy
 pandas
 xarray
 datetime
-skimage
 matplotlib
 cartopy
+scikit-image
