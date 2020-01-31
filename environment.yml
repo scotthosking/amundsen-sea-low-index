@@ -1,0 +1,13 @@
+name: asl-environment
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - pandas
+  - xarray
+  - matplotlib
+  - cartopy
+  - scikit-image
+  - cartopy
+  - dask
+  - netcdf4
