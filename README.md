@@ -1,6 +1,6 @@
 # Amundsen Sea Low Index (v3)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/scott-hosking/amundsen_sea_low_index/master?filepath=Amundsen_Sea_Low_Index_v3.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/scott-hosking/amundsen-sea-low-index/master?filepath=Amundsen_Sea_Low_Index_v3.ipynb)
 
 ![ASL image](asl.jpg) 
 
