@@ -1,6 +1,6 @@
 # Amundsen Sea Low Index (v3)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/scott-hosking/amundsen-sea-low-index/master?filepath=Amundsen_Sea_Low_Index_v3.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/scotthosking/amundsen-sea-low-index/master?filepath=Amundsen_Sea_Low_Index_v3.ipynb)
 
 ![ASL image](asl.jpg) 
 
@@ -8,6 +8,6 @@ The Amundsen Seas Low (ASL) is a highly dynamic and mobile climatological low pr
 
 Within this GitHub repository you will find ASL indices (1979-present, see plot below) which have been calculated using an ASL (low pressure system) detection methodology written in Python.
 
-More information can be found [here](https://scott-hosking.github.io/asl_index)
+More information can be found [here](https://scotthosking.com/asl_index)
 
 ![ASL image](asli_era5_v3_monthly_timeseries.png) 
