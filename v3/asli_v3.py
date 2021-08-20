@@ -9,7 +9,7 @@ indata = 'era5'
 
 ### Update this as the ASL / low detection algorithm is updated
 ### version_id = 3.<DATE>
-version_id = '3.20200107-'+indata # +'-TESTING' 
+version_id = '3.20210820-'+indata # +'-TESTING' 
 
 def asl_sector_mean(da, asl_region, mask):
     a = da.where(mask == 0).sel( latitude=slice(asl_region['north'],asl_region['south']), 
@@ -102,9 +102,9 @@ def write_csv_with_header(df, header, version_id, indata):
         if '-TESTING' not in version_id:
             version_id = version_id+'-TESTING'
 
-    if header is 'asli':     
+    if header == 'asli':     
         fname = indata+'/asli_v'+version_id+'.csv'
-    if header is 'all_lows': 
+    if header == 'all_lows': 
         fname = indata+'/all_lows_v'+version_id+'.csv'
 
     with open('csv_header_asli_v3.txt') as header_file:  
@@ -112,7 +112,7 @@ def write_csv_with_header(df, header, version_id, indata):
 
     with open(fname, 'w') as file:
         for line in lines:
-            if (header is 'all_lows'):
+            if (header == 'all_lows'):
                 line = line.replace('Amundsen Sea Low (ASL) Index version 3',
                                     'Detected lows within the Pacific sector of the Southern Ocean')
             line = line.replace( '<SOURCE_DATA>', indata.upper() )
@@ -125,12 +125,13 @@ def write_csv_with_header(df, header, version_id, indata):
 # Analysis
 print(indata)
 
-if indata is 'era5':
+if indata == 'era5':
     root = '../INDATA/ERA5/'
     da   = xr.open_mfdataset(root+'monthly/era5_mean_sea_level_pressure_monthly_*.nc').msl
+    da   = da.isel(expver=0)
     mask = xr.open_dataset(root+'/era5_invariant_lsm.nc').lsm.squeeze()
 
-if indata is 'era-interim':
+if indata == 'era-interim':
     root = '../INDATA/ERAI/'
     da   = xr.open_dataset(root+'/erai_sfc_monthly.nc').msl
     mask = xr.open_dataset(root+'/erai_invariant.nc').lsm.squeeze()

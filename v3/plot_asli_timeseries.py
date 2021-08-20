@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # Read in ASL data
-filename   = 'https://github.com/scotthosking/amundsen_sea_low_index/raw/master/asli_era5_v3-latest.csv'
+filename   = '../asli_era5_v3-latest.csv'
 asli       = pd.read_csv(filename, comment='#')
 asli['time'] = pd.to_datetime(asli['time'])
 asli = asli.set_index('time')
