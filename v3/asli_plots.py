@@ -37,9 +37,9 @@ def slice_region(da, region, boarder=5):
 # Plotting
 #---------------------------
 
-da   = xr.open_mfdataset('../INDATA/ERA5/monthly/era5_mean_sea_level_pressure_monthly*.nc').msl
+da   = xr.open_mfdataset('/Users/shosking/Large_Data/ERA5/monthly/era5_mean_sea_level_pressure_monthly*.nc').msl
 da   = da.isel(expver=0)
-mask = xr.open_dataset('../INDATA/ERA5/era5_invariant_lsm.nc').lsm.squeeze()
+mask = xr.open_dataset('/Users/shosking/Large_Data/ERA5/era5_invariant_lsm.nc').lsm.squeeze()
 
 da_mask = da.where(mask == 0)
 
@@ -57,7 +57,7 @@ da = da.assign_attrs(units='hPa')
 all_lows_dfs = pd.read_csv('era5/all_lows_v'+version_id+'-era5.csv', comment='#')
 asl_df       = pd.read_csv('era5/asli_v'+version_id+'-era5.csv', comment='#')
 
-for yr in range(1979,2022):
+for yr in range(1959,2023):
 
     print('plotting ', yr, version_id)
     plt.figure(figsize=(20,15))

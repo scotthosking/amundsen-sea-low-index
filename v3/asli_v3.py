@@ -126,9 +126,10 @@ def write_csv_with_header(df, header, version_id, indata):
 print(indata)
 
 if indata == 'era5':
-    root = '../INDATA/ERA5/'
-    da   = xr.open_mfdataset(root+'monthly/era5_mean_sea_level_pressure_monthly_*.nc').msl
-    da   = da.isel(expver=0)
+    root = '/Users/shosking/Large_Data/ERA5/'
+    da = xr.open_mfdataset(root+'monthly/era5_mean_sea_level_pressure_monthly_*.nc').msl
+    if da.expver.size > 1:
+        da = da.isel(expver=0)
     mask = xr.open_dataset(root+'/era5_invariant_lsm.nc').lsm.squeeze()
 
 if indata == 'era-interim':
