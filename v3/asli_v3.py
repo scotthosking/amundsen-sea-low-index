@@ -4,6 +4,9 @@ import pandas as pd
 from datetime import datetime
 from skimage.feature import peak_local_max
 
+### seasonal or monthly mean?
+seasonal_averaging = True
+
 ### era5, era-interim
 indata = 'era5'
 
@@ -22,6 +25,24 @@ def asl_sector_mean(da, asl_region, mask):
 #     da.values = img
 #     return da
 
+
+def season_mean(ds, calendar="standard"):
+    # # Make a DataArray with the number of days in each month, size = len(time)
+    # month_length = ds.time.dt.days_in_month
+
+    # # Calculate the weights by grouping by 'time.season'
+    # weights = (
+    #     month_length.groupby("time.season") / month_length.groupby("time.season").sum()
+    # )
+
+    # # Test that the sum of the weights for each season is 1.0
+    # np.testing.assert_allclose(weights.groupby("time.season").sum().values, np.ones(4))
+
+    # # Calculate the weighted average
+    # return (ds * weights).groupby("time.season").sum(dim="time")
+
+    return ds.resample(time='QS-Mar').mean('time')
+
 def get_lows(da, mask):
     '''
     da for one point in time (with lats x lons)
@@ -32,8 +53,11 @@ def get_lows(da, mask):
     sector_mean_pres = asl_sector_mean(da, asl_region, mask)
     threshold = sector_mean_pres
 
-    time_str = str(da.time.values)[:10]
-    
+    if 'season' in da.coords: 
+        time_str = str(da_t.season.values)
+    else:
+        time_str = str(da.time.values)[:10]
+
     # fill land in with highest value to limit lows being found here
     da_max   = da.max().values
     da       = da.where(mask == 0).fillna(da_max)
@@ -96,16 +120,16 @@ def slice_region(da, region, boarder=8):
                 longitude=slice(region['west']-boarder,region['east']+boarder))
     return da
 
-def write_csv_with_header(df, header, version_id, indata):
+def write_csv_with_header(df, header, version_id, indata, time_averaging):
 
-    if (len(all_lows_dfs.time.unique()) < 400):
+    if (len(all_lows_dfs.time.unique()) < 200):
         if '-TESTING' not in version_id:
             version_id = version_id+'-TESTING'
 
     if header == 'asli':     
-        fname = indata+'/asli_v'+version_id+'.csv'
+        fname = indata+'/asli_'+time_averaging+'_v'+version_id+'.csv'
     if header == 'all_lows': 
-        fname = indata+'/all_lows_v'+version_id+'.csv'
+        fname = indata+'/all_lows_'+time_averaging+'_v'+version_id+'.csv'
 
     with open('csv_header_asli_v3.txt') as header_file:  
         lines = header_file.readlines()
@@ -126,15 +150,19 @@ def write_csv_with_header(df, header, version_id, indata):
 print(indata)
 
 if indata == 'era5':
-    root = '../INDATA/ERA5/'
-    da   = xr.open_mfdataset(root+'monthly/era5_mean_sea_level_pressure_monthly_*.nc').msl
-    da   = da.isel(expver=0)
+    root = '/Users/shosking/Large_Data/ERA5/'
+    da = xr.open_mfdataset(root+'monthly/era5_mean_sea_level_pressure_monthly_*.nc').msl
+    if da.expver.size > 1:
+        da = da.isel(expver=0)
     mask = xr.open_dataset(root+'/era5_invariant_lsm.nc').lsm.squeeze()
 
 if indata == 'era-interim':
     root = '../INDATA/ERAI/'
     da   = xr.open_dataset(root+'/erai_sfc_monthly.nc').msl
     mask = xr.open_dataset(root+'/erai_invariant.nc').lsm.squeeze()
+
+if seasonal_averaging == True:
+    da = season_mean(da, calendar="standard")
 
 da_mask = da.where(mask == 0)
 
@@ -149,16 +177,28 @@ da_mask = slice_region(da_mask, asl_region)
 da = da / 100. 
 da = da.assign_attrs(units='hPa')
 
-ntime        = da.time.shape[0]
+if 'season' in da.dims: 
+    ntime = 4
+if 'time' in da.dims: 
+    ntime = da.time.shape[0]
+
 all_lows_dfs = pd.DataFrame()
 
 for t in range(0,ntime):
-    da_t         = da.isel(time=t)
+    if 'season' in da.dims: da_t = da.isel(season=t)
+    if 'time' in da.dims:   da_t = da.isel(time=t)
+
     all_lows_df  = get_lows(da_t, mask)
     all_lows_dfs = pd.concat([all_lows_dfs, all_lows_df], ignore_index=True)
 
 asl_df = define_asl(all_lows_dfs, asl_region)
 
 ### Write CSV files
-write_csv_with_header( asl_df,       'asli',     version_id, indata )
-write_csv_with_header( all_lows_dfs, 'all_lows', version_id, indata )
+if seasonal_averaging == False:
+    write_csv_with_header( asl_df,       'asli',     version_id, indata, 'monthly' )
+    write_csv_with_header( all_lows_dfs, 'all_lows', version_id, indata, 'monthly' )
+
+### TO DO: detect whether asl_df is seasonal within the def and adjust fname accordingly
+if seasonal_averaging == True:
+    write_csv_with_header( asl_df,       'asli',     version_id, indata, 'seasonal' )
+    write_csv_with_header( all_lows_dfs, 'all_lows', version_id, indata, 'seasonal' )
