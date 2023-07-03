@@ -5,7 +5,7 @@ from datetime import datetime
 from skimage.feature import peak_local_max
 
 ### seasonal or monthly mean?
-seasonal_averaging = True
+seasonal_averaging = False
 
 ### era5, era-interim
 indata = 'era5'
