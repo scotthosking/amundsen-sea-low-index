@@ -18,6 +18,9 @@
 #   lat        = Latitudinal location of ASL
 #   RelCenPres = Relative central pressure (ActCenPres 'minus' SectorPres)
 # 
+# WARNING: When an ASL is not detected by the algorithm that point in time 
+#          is not included in this index 
+# 
 # The ASL (low pressure system) detection algorithm may be improved over time. Therefore 
 # it is recommended that the version number below is noted when using these data.
 #   ASLi_version_id = 3.20210820-era5
