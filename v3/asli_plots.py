@@ -57,7 +57,7 @@ da = da.assign_attrs(units='hPa')
 all_lows_dfs = pd.read_csv('era5/all_lows_v'+version_id+'-era5.csv', comment='#')
 asl_df       = pd.read_csv('era5/asli_monthly_v'+version_id+'-era5.csv', comment='#')
 
-for yr in range(1959,2023):
+for yr in range(2023,2024):
 
     print('plotting ', yr, version_id)
     plt.figure(figsize=(20,15))
