@@ -24,13 +24,13 @@ def draw_regional_box( region, transform=None ):
     plt.plot([region['east'], region['east']], [region['south'],region['north']], 
                  'k-', transform=transform, linewidth=1)
     
-    for i in range( np.int(region['west']),np.int(region['east']) ): 
+    for i in np.arange( region['west'], region['east'] ): 
         plt.plot([i,i+1], [region['south'],region['south']], 'k-', transform=transform, linewidth=1)
         plt.plot([i,i+1], [region['north'],region['north']], 'k-', transform=transform, linewidth=1)
 
 def slice_region(da, region, boarder=5):
-    da = da.sel( latitude=slice(region['north']+boarder,region['south']-boarder), 
-                longitude=slice(region['west']-boarder,region['east']+boarder))
+    da = da.sel( latitude=slice(region['north']+boarder, region['south']-boarder), 
+                longitude=slice(region['west']-boarder, region['east']+boarder))
     return da
 
 #---------------------------
@@ -55,7 +55,7 @@ da = da  / 100.
 da = da.assign_attrs(units='hPa')
 
 all_lows_dfs = pd.read_csv('era5/all_lows_v'+version_id+'-era5.csv', comment='#')
-asl_df       = pd.read_csv('era5/asli_v'+version_id+'-era5.csv', comment='#')
+asl_df       = pd.read_csv('era5/asli_monthly_v'+version_id+'-era5.csv', comment='#')
 
 for yr in range(1959,2023):
 
