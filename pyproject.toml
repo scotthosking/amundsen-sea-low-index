@@ -9,9 +9,9 @@ authors = [
     {name = "J. Scott Hosking", email="jshosking@gmail.com"},
     {name = "David Wilby", email="dalby@bas.ac.uk"}
 ]
-description = "Amundsen Sea Low detection from mean sea level pressure fields "
+description = "Amundsen Sea Low detection from mean sea level pressure fields."
 readme = "README.md"
-license = {text=""}
+license = {text="MIT License"}
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent"
