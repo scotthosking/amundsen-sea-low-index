@@ -6,10 +6,13 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping
 
+import joblib
 import pandas as pd
 import skimage
 from tqdm import tqdm
 import xarray as xr
+
+from .utils import tqdm_joblib
 
 logging.getLogger('asli').addHandler(logging.NullHandler())
 
@@ -93,6 +96,14 @@ def get_lows(da: xr.DataArray, mask:xr.DataArray) -> pd.DataFrame:
 
     return df
 
+def _get_lows_by_time(da: xr.DataArray, slice_by: str, t: int, mask: xr.DataArray):
+
+    if slice_by == 'season':
+        da_t = da.isel(season=t)
+    elif slice_by == 'time':
+        da_t = da.isel(time=t)
+    
+    return get_lows(da_t, mask)
 
 def define_asl(df: pd.DataFrame, asl_region: Mapping[str, float] = ASL_REGION) -> pd.DataFrame:
     """
@@ -201,20 +212,18 @@ class ASLICalculator:
         self.read_mask_data()
         self.read_msl_data()
 
-    def calculate(self):
+    def calculate(self, n_jobs: int = 4):
         if 'season' in self.sliced_msl.dims: 
             ntime = 4
+            slice_by = "season"
         if 'time' in self.sliced_msl.dims: 
             ntime = self.sliced_msl.time.shape[0]
+            slice_by = "time"
 
-        all_lows_dfs = pd.DataFrame()
-
-        for t in tqdm(range(0, ntime)):
-            if 'season' in self.sliced_msl.dims: da_t = self.sliced_msl.isel(season=t)
-            if 'time' in self.sliced_msl.dims:   da_t = self.sliced_msl.isel(time=t)
-
-            all_lows_df  = get_lows(da_t, self.land_sea_mask)
-            all_lows_dfs = pd.concat([all_lows_dfs, all_lows_df], ignore_index=True)
+        with tqdm_joblib(tqdm(total=ntime)) as progress_bar:
+            lows_per_time = joblib.Parallel(n_jobs=n_jobs)(joblib.delayed(_get_lows_by_time)(self.sliced_msl, slice_by, t, self.land_sea_mask) for t in range(ntime))
+        
+        all_lows_dfs = pd.concat(lows_per_time, ignore_index=True)
 
         self.asl_df = define_asl(all_lows_dfs)
         return self.asl_df
