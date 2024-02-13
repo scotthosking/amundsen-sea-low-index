@@ -1,17 +1,17 @@
 """Perform calculations of the Amundsen Sea Low Index"""
 
 import logging
+import os
 from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping
 
 import pandas as pd
 import skimage
+from tqdm import tqdm
 import xarray as xr
-import pandas as pd
-from datetime import datetime
 
-# from asli.utils import write_csv_with_header
+logging.getLogger('asli').addHandler(logging.NullHandler())
 
 # Version of the calculation method (*NOT* the package version)
 CALCULATION_VERSION = "3.20210820"
@@ -23,6 +23,7 @@ ASL_REGION = MappingProxyType({
     'south':-80.0,
     'north':-60.0
     })
+
 
 def asl_sector_mean(da: xr.DataArray, mask: xr.DataArray, asl_region: Mapping[str, float] = ASL_REGION) -> xr.DataArray:
     """
@@ -110,8 +111,9 @@ def define_asl(df: pd.DataFrame, asl_region: Mapping[str, float] = ASL_REGION) -
     return df2
 
 
-def slice_region(da, region, border=8):
+def slice_region(da: xr.DataArray, region: Mapping[str, float] = ASL_REGION, border: int = 8):
     """
+    Select region from within data arrray, with surrounding border.
     """
     da = da.sel( latitude=slice(region['north']+border,region['south']-border), 
                 longitude=slice(region['west']-border,region['east']+border))
@@ -142,40 +144,47 @@ class ASLICalculator:
 
     def __init__(self,
                 data_dir:str = "./data",
-                mask_file_path: str = "invariant.nc",
+                mask_filename: str = "era5_lsm.nc",
+                msl_pattern: str = 'monthly/era5_mean_sea_level_pressure_monthly_*.nc'
                 ) -> None:
         
+        self.data_dir = Path(data_dir)
+        self.mask_filename = mask_filename
+        self.msl_pattern = msl_pattern
+
         self.land_sea_mask = None
         self.raw_msl_data = None
         self.masked_msl_data = None
         self.sliced_msl = None
         self.sliced_masked_msl = None
-        self.data_dir = Path(data_dir)
 
-    def read_mask_data(self, mask_file_path:str):
+    def read_mask_data(self):
         """
-        Reads in the Land-Sea mask file.
- 
+        Reads in the Land-Sea mask file from <data_dir>/<mask_filename>
         """
 
-        self.land_sea_mask = xr.open_dataset().lsm.squeeze()
+        self.land_sea_mask = xr.open_dataset(Path(self.data_dir, self.mask_filename)).lsm.squeeze()
 
-    def read_msl_data(self, msl_pattern:str = 'monthly/era5_mean_sea_level_pressure_monthly_*.nc'):
+
+    def read_msl_data(self):
         """
+        Reads in the MSL (mean sea level pressure) files from <data_dir>/<msl_pattern>.
+        msl_pattern should be a file path under <data_dir> or a pattern (also within <data_dir>) as taken by xarray.open_mfdataset()
+        eg monthly/era5_mean_sea_level_pressure_monthly_*.nc
         """
 
         if self.land_sea_mask is None:
             logging.error("Must read in land-sea mask before mean sea level data.")
             return
 
-        raw_msl_data_path = Path(self.data_dir, msl_pattern)
+        raw_msl_data_path = os.path.join(self.data_dir, self.msl_pattern)
         self.raw_msl_data = xr.open_mfdataset(raw_msl_data_path).msl
 
         # expver attr is only present in mixed era5/era5T data? https://confluence.ecmwf.int/pages/viewpage.action?pageId=171414041
-        if self.raw_msl_data.attrs.get('expver') is not None and self.raw_msl_data.expver.size > 1: 
+        if hasattr(self.raw_msl_data, 'expver') and self.raw_msl_data.expver.size > 1:
             self.raw_msl_data = self.raw_msl_data.isel(expver=0)
 
-        self.masked_msl_data = self.raw_msl_data.where(self.land_sea_mask == 0)
+        self.masked_msl_data = self.raw_msl_data.where(self.land_sea_mask > 0.5)
 
         ### slice area around ASL region
         sliced_msl = slice_region(self.raw_msl_data)
@@ -186,6 +195,9 @@ class ASLICalculator:
         self.sliced_msl = sliced_msl.assign_attrs(units='hPa')
 
     def read_data(self):
+        """
+        Convenience method for reading in both mask and msl data files.
+        """
         self.read_mask_data()
         self.read_msl_data()
 
@@ -197,7 +209,7 @@ class ASLICalculator:
 
         all_lows_dfs = pd.DataFrame()
 
-        for t in range(0, ntime):
+        for t in tqdm(range(0, ntime)):
             if 'season' in self.sliced_msl.dims: da_t = self.sliced_msl.isel(season=t)
             if 'time' in self.sliced_msl.dims:   da_t = self.sliced_msl.isel(time=t)
 
@@ -206,19 +218,22 @@ class ASLICalculator:
 
         self.asl_df = define_asl(all_lows_dfs)
         return self.asl_df
+    
+    def to_csv(self):
+        pass
 
     def plot():
         raise NotImplementedError
 
 
-def main(data_dir, mask_file_path, msl_file_pattern):
-    asli = ASLICalculator(data_dir, mask_file_path, msl_file_pattern)
-    asli.read_data()
-    asli.calculate()
+# def main(data_dir, mask_file_path, msl_file_pattern):
+#     a = ASLICalculator(data_dir, mask_file_path, msl_file_pattern)
+#     a.read_data()
+#     a.calculate()
     
 
-if __name__ == "__main__":
-    """
-    Command-line interface to ASL calculation
-    """
-    main()
+# if __name__ == "__main__":
+#     """
+#     Command-line interface to ASL calculation
+#     """
+#     main()

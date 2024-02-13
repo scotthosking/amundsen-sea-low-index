@@ -10,6 +10,8 @@ import cdsapi
 
 from asli.asli import ASL_REGION
 
+logging.getLogger('asli').addHandler(logging.NullHandler())
+
 class CDSDownloader:
     def __init__(self, data_dir:str, request_params:dict, output_filename:str, area:dict):
         self.data_dir = data_dir

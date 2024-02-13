@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42"]
+requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -32,12 +32,6 @@ dependencies = [
 [project.urls]
 Source = "https://github.com/scotthosking/amundsen-sea-low-index"
 Bug_Tracker = "https://github.com/scotthosking/amundsen-sea-low-index/issues"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["asli"]
-exclude = ["tests", "notebooks"]
-namespaces = false
 
 [project.optional-dependencies]
 tests = [
