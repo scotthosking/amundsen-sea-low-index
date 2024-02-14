@@ -6,12 +6,16 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping
 
+import cartopy.crs as ccrs
 import joblib
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import skimage
 from tqdm import tqdm
 import xarray as xr
 
+from .plot import draw_regional_box
 from .utils import tqdm_joblib
 
 logging.getLogger('asli').addHandler(logging.NullHandler())
@@ -34,7 +38,7 @@ def asl_sector_mean(da: xr.DataArray, mask: xr.DataArray, asl_region: Mapping[st
     `asl_region` defaults to Amundsen Sea bounds defined in this module as `ASL_REGION`.
     """
 
-    return da.where(mask == 0).sel(
+    return da.where(mask < 0.5).sel(
             latitude=slice(asl_region['north'],
                         asl_region['south']), 
             longitude=slice(asl_region['west'],
@@ -56,7 +60,7 @@ def get_lows(da: xr.DataArray, mask:xr.DataArray) -> pd.DataFrame:
     
     # fill land in with highest value to limit lows being found here
     da_max   = da.max().values
-    da       = da.where(mask == 0).fillna(da_max)
+    da       = da.where(mask < 0.5).fillna(da_max)
         
     invert_data = (da*-1.).values     # search for peaks rather than minima
     
@@ -195,7 +199,7 @@ class ASLICalculator:
         if hasattr(self.raw_msl_data, 'expver') and self.raw_msl_data.expver.size > 1:
             self.raw_msl_data = self.raw_msl_data.isel(expver=0)
 
-        self.masked_msl_data = self.raw_msl_data.where(self.land_sea_mask > 0.5)
+        self.masked_msl_data = self.raw_msl_data.where(self.land_sea_mask < 0.5)
 
         ### slice area around ASL region
         sliced_msl = slice_region(self.raw_msl_data)
@@ -231,18 +235,31 @@ class ASLICalculator:
     def to_csv(self):
         pass
 
-    def plot():
-        raise NotImplementedError
+    def plot(self):
+        plt.figure(figsize=(20,15))
 
+        for i in range(0,12):
+            
+            da_2D = self.masked_msl_data.isel(time=i)
 
-# def main(data_dir, mask_file_path, msl_file_pattern):
-#     a = ASLICalculator(data_dir, mask_file_path, msl_file_pattern)
-#     a.read_data()
-#     a.calculate()
-    
+            da_2D = da_2D.sel(latitude=slice(-55,-90),longitude=slice(165,305))
 
-# if __name__ == "__main__":
-#     """
-#     Command-line interface to ASL calculation
-#     """
-#     main()
+            ax = plt.subplot( 3, 4, i+1, 
+                                projection=ccrs.Stereographic(central_longitude=0., 
+                                                            central_latitude=-90.) )
+
+            ax.set_extent([165,305,-85,-55], ccrs.PlateCarree())
+
+            result = da_2D.plot.contourf( 'longitude', 'latitude', cmap='Reds', 
+                                            transform=ccrs.PlateCarree(), 
+                                            add_colorbar=False, 
+                                            levels=np.linspace(np.nanmin(da_2D.values), np.nanmax(da_2D.values), 20) )
+
+            # ax.coastlines(resolution='110m')
+            ax.set_title(str(da_2D.time.values)[0:7])
+
+            ## mark ASL
+            df2 = self.asl_df[ self.asl_df['time'] == str(da_2D.time.values)[0:10]]
+            if len(df2) > 0:
+                ax.plot(df2['lon'], df2['lat'], 'mx', transform=ccrs.PlateCarree() )
+            draw_regional_box(ASL_REGION)
