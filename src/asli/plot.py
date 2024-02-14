@@ -27,7 +27,7 @@ def draw_regional_box( region, transform=None ):
         plt.plot([i,i+1], [region['north'],region['north']], 'k-', transform=transform, linewidth=1)
 
 def plot_lows(da:xr.DataArray, df:pd.DataFrame,
-            cmap:str="Reds",
+            cmap:str="Reds", border:int=10,
             regionbox:dict=ASL_REGION, coastlines:bool=False):
 
     plt.figure(figsize=(20,15))
@@ -36,18 +36,18 @@ def plot_lows(da:xr.DataArray, df:pd.DataFrame,
         
         da_2D = da.isel(time=i)
 
-        da_2D = da_2D.sel(latitude=slice(regionbox['north']+10, regionbox['south']-10),
-                          longitude=slice(regionbox['west']-10, regionbox['east']-10))
+        da_2D = da_2D.sel(latitude=slice(regionbox['north']+border, regionbox['south']-border),
+                          longitude=slice(regionbox['west']-border, regionbox['east']+border))
 
         ax = plt.subplot( 3, 4, i+1, 
                             projection=ccrs.Stereographic(central_longitude=0., 
                                                         central_latitude=-90.) )
 
         if regionbox:
-            ax.set_extent([regionbox['west']-10,
-                                     regionbox['east']-10,
-                                     regionbox['south']-10,
-                                     regionbox['north']+10],
+            ax.set_extent([regionbox['west']-border,
+                                     regionbox['east']+border,
+                                     regionbox['south']-border,
+                                     regionbox['north']+border],
                                     ccrs.PlateCarree())
 
         da_2D.plot.contourf('longitude', 'latitude', cmap=cmap, 
