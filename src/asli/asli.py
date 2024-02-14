@@ -1,5 +1,6 @@
 """Perform calculations of the Amundsen Sea Low Index"""
 
+import argparse
 import datetime
 import logging
 import os
@@ -291,5 +292,36 @@ class ASLICalculator:
         df = self.asl_df.sel(time=slice(str(year)+"-01-01",str(year)+"-12-01"))
         plot_lows(da, df, year=year, regionbox=ASL_REGION)
 
-    # def plot_hemisphere(self):
-    #     plot_hemisphere(self.masked_msl_data)
+
+def main():
+    """Command-line interface to ASL calculation."""
+
+    parser = argparse.ArgumentParser(prog='asli_calc',
+                                     description='Calculates the Amundsen Sea Low from mean sea level pressure fields.')
+    parser.add_argument("-d", "--datadir", nargs="?", type=str, default="./data", help="Path to directory in which to put downloaded data. (Default: ./data)")
+    parser.add_argument("-m", "--mask", nargs="?", type=str, default="era5_lsm.nc", help="Land-sea mask file path relative to <datadir>. (Default: era5_lsm.nc)")
+    parser.add_argument("-o", "--output", type=str, help="Output file path for CSV, relative to <datadir>.")
+    parser.add_argument("-n", "--numjobs", nargs="?", type=int, default=1,
+                        help="Number of processes used by joblib in parallel calculation.")
+    # filter by time range
+    # parser.add_argument("-p", "--plot", action='store_true', type=bool, help="Outputs a plot of the pressure fields and lows.")
+    parser.add_argument("msl_files", nargs="*", type=str, help="Path or glob pattern relative to <datadir> for file(s) containing mean sea level pressure.") # msl files/pattern
+
+    args = parser.parse_args()
+
+    a = ASLICalculator(args.datadir,
+                       args.mask,
+                       args.msl_files[0])
+    a.read_mask_data()
+    a.read_msl_data()
+    a.calculate(args.numjobs)
+
+    if args.output:
+        a.to_csv(args.output)
+
+    # if args.plot:
+    #     a.plot_region_year()
+
+
+if __name__ == "__main__":
+    main()
