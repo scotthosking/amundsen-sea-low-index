@@ -227,6 +227,7 @@ class ASLICalculator:
 
         filepath = Path(self.data_dir, filename)
 
+        # TODO handle source data, time_averaging and writing out all lows
         # if (len(self.all_lows_dfs.time.unique()) < 200):
         #     if '-TESTING' not in version_id:
         #         version_id = version_id+'-TESTING'

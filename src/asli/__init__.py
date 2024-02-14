@@ -1,5 +1,6 @@
-from . import data, plot, utils
-
+# Import the asli module here for nicer namespace
 from .asli import *
 
-from .params import CALCULATION_VERSION, ASL_REGION
+from . import data, plot, utils
+
+from .params import CALCULATION_VERSION, ASL_REGION, SOFTWARE_VERSION

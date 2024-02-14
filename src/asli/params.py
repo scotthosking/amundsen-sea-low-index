@@ -2,9 +2,10 @@
 Parameters used by all modules
 """
 
+import importlib.metadata
 from types import MappingProxyType
 
-SOFTWARE_VERSION='0.0.1'
+SOFTWARE_VERSION=importlib.metadata.version("asli")
 
 # Version of the calculation method (*NOT* the package version)
 CALCULATION_VERSION = "3.20210820"
