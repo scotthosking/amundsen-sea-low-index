@@ -1,8 +1,8 @@
-from types import MappingProxyType
-
 """
 Parameters used by all modules
 """
+
+from types import MappingProxyType
 
 # Version of the calculation method (*NOT* the package version)
 CALCULATION_VERSION = "3.20210820"
@@ -15,6 +15,6 @@ ASL_REGION = MappingProxyType({
     'north':-60.0
     })
 
-# Theshold for land-sea mask percentage land per pixel
+# Threshold for land-sea mask percentage land per pixel
 MASK_THRESHOLD = 0.5
 
