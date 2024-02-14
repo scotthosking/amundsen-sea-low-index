@@ -3,7 +3,6 @@
 import logging
 import os
 from pathlib import Path
-from types import MappingProxyType
 from typing import Mapping
 
 import cartopy.crs as ccrs
@@ -15,22 +14,11 @@ import skimage
 from tqdm import tqdm
 import xarray as xr
 
-from .plot import draw_regional_box
+from .params import ASL_REGION
+from .plot import plot_lows
 from .utils import tqdm_joblib
 
 logging.getLogger('asli').addHandler(logging.NullHandler())
-
-# Version of the calculation method (*NOT* the package version)
-CALCULATION_VERSION = "3.20210820"
-
-# Bounds of the Amundsen Sea region
-ASL_REGION = MappingProxyType({
-    'west':170.0,
-    'east':298.0,
-    'south':-80.0,
-    'north':-60.0
-    })
-
 
 def asl_sector_mean(da: xr.DataArray, mask: xr.DataArray, asl_region: Mapping[str, float] = ASL_REGION) -> xr.DataArray:
     """
@@ -235,31 +223,13 @@ class ASLICalculator:
     def to_csv(self):
         pass
 
-    def plot(self):
-        plt.figure(figsize=(20,15))
+    def plot_region_all(self, **kwargs):
+        plot_lows(self.masked_msl_data, self.asl_df, regionbox=ASL_REGION, **kwargs)
 
-        for i in range(0,12):
-            
-            da_2D = self.masked_msl_data.isel(time=i)
+    def plot_region_year(self, year:int):
+        da = self.masked_msl_data.sel(time=slice(str(year)+"-01-01",str(year)+"-12-01"))
+        df = self.asl_df.sel(time=slice(str(year)+"-01-01",str(year)+"-12-01"))
+        plot_lows(da, df, year=year, regionbox=ASL_REGION)
 
-            da_2D = da_2D.sel(latitude=slice(-55,-90),longitude=slice(165,305))
-
-            ax = plt.subplot( 3, 4, i+1, 
-                                projection=ccrs.Stereographic(central_longitude=0., 
-                                                            central_latitude=-90.) )
-
-            ax.set_extent([165,305,-85,-55], ccrs.PlateCarree())
-
-            result = da_2D.plot.contourf( 'longitude', 'latitude', cmap='Reds', 
-                                            transform=ccrs.PlateCarree(), 
-                                            add_colorbar=False, 
-                                            levels=np.linspace(np.nanmin(da_2D.values), np.nanmax(da_2D.values), 20) )
-
-            # ax.coastlines(resolution='110m')
-            ax.set_title(str(da_2D.time.values)[0:7])
-
-            ## mark ASL
-            df2 = self.asl_df[ self.asl_df['time'] == str(da_2D.time.values)[0:10]]
-            if len(df2) > 0:
-                ax.plot(df2['lon'], df2['lat'], 'mx', transform=ccrs.PlateCarree() )
-            draw_regional_box(ASL_REGION)
+    # def plot_hemisphere(self):
+    #     plot_hemisphere(self.masked_msl_data)

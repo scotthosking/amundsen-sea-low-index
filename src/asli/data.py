@@ -8,7 +8,7 @@ from pathlib import Path
 
 import cdsapi
 
-from asli.asli import ASL_REGION
+from .params import ASL_REGION
 
 logging.getLogger('asli').addHandler(logging.NullHandler())
 
