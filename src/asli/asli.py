@@ -14,7 +14,7 @@ import skimage
 from tqdm import tqdm
 import xarray as xr
 
-from .params import ASL_REGION
+from .params import ASL_REGION, MASK_THRESHOLD
 from .plot import plot_lows
 from .utils import tqdm_joblib
 
@@ -26,7 +26,7 @@ def asl_sector_mean(da: xr.DataArray, mask: xr.DataArray, asl_region: Mapping[st
     `asl_region` defaults to Amundsen Sea bounds defined in this module as `ASL_REGION`.
     """
 
-    return da.where(mask < 0.5).sel(
+    return da.where(mask < MASK_THRESHOLD).sel(
             latitude=slice(asl_region['north'],
                         asl_region['south']), 
             longitude=slice(asl_region['west'],
@@ -48,7 +48,7 @@ def get_lows(da: xr.DataArray, mask:xr.DataArray) -> pd.DataFrame:
     
     # fill land in with highest value to limit lows being found here
     da_max   = da.max().values
-    da       = da.where(mask < 0.5).fillna(da_max)
+    da       = da.where(mask < MASK_THRESHOLD).fillna(da_max)
         
     invert_data = (da*-1.).values     # search for peaks rather than minima
     
@@ -187,7 +187,7 @@ class ASLICalculator:
         if hasattr(self.raw_msl_data, 'expver') and self.raw_msl_data.expver.size > 1:
             self.raw_msl_data = self.raw_msl_data.isel(expver=0)
 
-        self.masked_msl_data = self.raw_msl_data.where(self.land_sea_mask < 0.5)
+        self.masked_msl_data = self.raw_msl_data.where(self.land_sea_mask < MASK_THRESHOLD)
 
         ### slice area around ASL region
         sliced_msl = slice_region(self.raw_msl_data)

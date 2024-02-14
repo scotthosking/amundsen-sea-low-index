@@ -15,3 +15,6 @@ ASL_REGION = MappingProxyType({
     'north':-60.0
     })
 
+# Theshold for land-sea mask percentage land per pixel
+MASK_THRESHOLD = 0.5
+
