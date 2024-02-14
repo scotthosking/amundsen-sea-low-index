@@ -1,5 +1,6 @@
 """Perform calculations of the Amundsen Sea Low Index"""
 
+import datetime
 import logging
 import os
 from pathlib import Path
@@ -14,7 +15,7 @@ import skimage
 from tqdm import tqdm
 import xarray as xr
 
-from .params import ASL_REGION, MASK_THRESHOLD
+from .params import ASL_REGION, CALCULATION_VERSION, SOFTWARE_VERSION, MASK_THRESHOLD
 from .plot import plot_lows
 from .utils import tqdm_joblib
 
@@ -160,6 +161,7 @@ class ASLICalculator:
         self.masked_msl_data = None
         self.sliced_msl = None
         self.sliced_masked_msl = None
+        self.asl_df = None
 
     def read_mask_data(self):
         """
@@ -215,13 +217,41 @@ class ASLICalculator:
         with tqdm_joblib(tqdm(total=ntime)) as progress_bar:
             lows_per_time = joblib.Parallel(n_jobs=n_jobs)(joblib.delayed(_get_lows_by_time)(self.sliced_msl, slice_by, t, self.land_sea_mask) for t in range(ntime))
         
-        all_lows_dfs = pd.concat(lows_per_time, ignore_index=True)
+        self.all_lows_dfs = pd.concat(lows_per_time, ignore_index=True)
 
-        self.asl_df = define_asl(all_lows_dfs)
+        self.asl_df = define_asl(self.all_lows_dfs)
         return self.asl_df
     
-    def to_csv(self):
-        pass
+
+    def to_csv(self, filename:str):
+
+        filepath = Path(self.data_dir, filename)
+
+        # if (len(self.all_lows_dfs.time.unique()) < 200):
+        #     if '-TESTING' not in version_id:
+        #         version_id = version_id+'-TESTING'
+
+        # if header == 'asli':     
+        #     fname = indata+'/asli_'+time_averaging+'_v'+version_id+'.csv'
+        # if header == 'all_lows': 
+        #     fname = indata+'/all_lows_'+time_averaging+'_v'+version_id+'.csv'
+
+        # Set up jinja
+        from jinja2 import Environment, PackageLoader, select_autoescape
+        env = Environment(
+            loader=PackageLoader("asli"),
+            autoescape=select_autoescape()
+        )
+        template = env.get_template("asli_data.csv.template")
+
+        header = template.render(calculation_version=CALCULATION_VERSION,
+                        software_version=SOFTWARE_VERSION,
+                        data_version=datetime.datetime.now().strftime("%Y%m%d")
+                        )
+        
+        with open(filepath, 'w') as f:
+            f.writelines(header)
+            self.asl_df.to_csv(f, index=False)
 
     def plot_region_all(self, **kwargs):
         plot_lows(self.masked_msl_data, self.asl_df, regionbox=ASL_REGION, **kwargs)

@@ -4,6 +4,8 @@ Parameters used by all modules
 
 from types import MappingProxyType
 
+SOFTWARE_VERSION='0.0.1'
+
 # Version of the calculation method (*NOT* the package version)
 CALCULATION_VERSION = "3.20210820"
 
