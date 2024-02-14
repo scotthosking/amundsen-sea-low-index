@@ -1,6 +1,5 @@
 import contextlib
 import joblib
-from tqdm import tqdm
 
 # https://stackoverflow.com/questions/24983493/tracking-progress-of-joblib-parallel-execution
 @contextlib.contextmanager

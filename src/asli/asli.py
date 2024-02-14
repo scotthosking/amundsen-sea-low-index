@@ -6,9 +6,7 @@ import os
 from pathlib import Path
 from typing import Mapping
 
-import cartopy.crs as ccrs
 import joblib
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import skimage
@@ -24,7 +22,7 @@ logging.getLogger('asli').addHandler(logging.NullHandler())
 def asl_sector_mean(da: xr.DataArray, mask: xr.DataArray, asl_region: Mapping[str, float] = ASL_REGION) -> xr.DataArray:
     """
     Mean of data array `da`, masked by land-sea mask `mask` within bounded region `asl_region`.
-    `asl_region` defaults to Amundsen Sea bounds defined in this module as `ASL_REGION`.
+    `asl_region` defaults to Amundsen Sea bounds defined in this package as `ASL_REGION`.
     """
 
     return da.where(mask < MASK_THRESHOLD).sel(
@@ -37,7 +35,14 @@ def asl_sector_mean(da: xr.DataArray, mask: xr.DataArray, asl_region: Mapping[st
 
 def get_lows(da: xr.DataArray, mask:xr.DataArray) -> pd.DataFrame:
     """
-    da for one point in time (with lats x lons)
+    Finds local minima in data array da, ignoring land from land-sea mask, mask.
+
+    Args:
+        da (xr.DataArray): data array containing mean sea level pressure fields.
+        mask (xr.DataArray): data array containing land-sea mask
+
+    Returns:
+        pd.DataFrame: containing columns 'time','lon','lat','ActCenPres','SectorPres','RelCenPres'
     """
     
     lons, lats = da.longitude.values, da.latitude.values
@@ -98,14 +103,16 @@ def _get_lows_by_time(da: xr.DataArray, slice_by: str, t: int, mask: xr.DataArra
     
     return get_lows(da_t, mask)
 
-def define_asl(df: pd.DataFrame, asl_region: Mapping[str, float] = ASL_REGION) -> pd.DataFrame:
+def define_minima_per_time_in_region(df: pd.DataFrame, region: Mapping[str, float] = ASL_REGION) -> pd.DataFrame:
     """
+    From a dataframe of multiple minima per time period, selects the lowest minimum within each time period,
+    contained within bounding box: region (defaults to ASL_REGION)
     """
     ### select only those points within ASL box
-    df2 = df[(df['lon'] > asl_region['west'])  & 
-                (df['lon'] < asl_region['east'])  & 
-                (df['lat'] > asl_region['south']) & 
-                (df['lat'] < asl_region['north']) ]
+    df2 = df[(df['lon'] > region['west'])  & 
+                (df['lon'] < region['east'])  & 
+                (df['lat'] > region['south']) & 
+                (df['lat'] < region['north']) ]
 
     ### For each time, get the row with the lowest minima_number
     df2 = df2.loc[df2.groupby('time')['ActCenPres'].idxmin()]
@@ -206,7 +213,17 @@ class ASLICalculator:
         self.read_mask_data()
         self.read_msl_data()
 
-    def calculate(self, n_jobs: int = 4):
+    def calculate(self, n_jobs: int = 1) -> pd.DataFrame:
+        """
+        From loaded mean sea level pressure data and land-sea mask, runs the calculation of minima.
+
+        Args:
+            n_jobs (int, optional): Number of processes to use for parallel caclulation. Defaults to 1.
+
+        Returns:
+            pd.DataFrame: dataframe containing locations of pressure minima, mean pressure
+        """
+
         if 'season' in self.sliced_msl.dims: 
             ntime = 4
             slice_by = "season"
@@ -219,11 +236,16 @@ class ASLICalculator:
         
         self.all_lows_dfs = pd.concat(lows_per_time, ignore_index=True)
 
-        self.asl_df = define_asl(self.all_lows_dfs)
+        self.asl_df = define_minima_per_time_in_region(self.all_lows_dfs)
         return self.asl_df
     
 
-    def to_csv(self, filename:str):
+    def to_csv(self, filename:str) -> None:
+        """Writes out ASLICalculator.asl_df as a CSV file with header.
+
+        Args:
+            filename (str): filename to write out to.
+        """
 
         filepath = Path(self.data_dir, filename)
 
@@ -254,10 +276,17 @@ class ASLICalculator:
             f.writelines(header)
             self.asl_df.to_csv(f, index=False)
 
-    def plot_region_all(self, **kwargs):
-        plot_lows(self.masked_msl_data, self.asl_df, regionbox=ASL_REGION, **kwargs)
+    def plot_region_all(self):
+        """Plots mean sea level pressure fields for the Amundsen Sea with identified low pressure and bounding box.
+        """
+        plot_lows(self.masked_msl_data, self.asl_df, regionbox=ASL_REGION)
 
     def plot_region_year(self, year:int):
+        """As for plot_region_all but selects only year
+
+        Args:
+            year (int): year to plot
+        """
         da = self.masked_msl_data.sel(time=slice(str(year)+"-01-01",str(year)+"-12-01"))
         df = self.asl_df.sel(time=slice(str(year)+"-01-01",str(year)+"-12-01"))
         plot_lows(da, df, year=year, regionbox=ASL_REGION)

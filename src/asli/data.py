@@ -1,8 +1,7 @@
 """Download and organise data for ASLI calculations"""
 
 import argparse
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
+from datetime import datetime
 import logging 
 from pathlib import Path
 
