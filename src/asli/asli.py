@@ -292,9 +292,8 @@ class ASLICalculator:
         df = self.asl_df.sel(time=slice(str(year)+"-01-01",str(year)+"-12-01"))
         plot_lows(da, df, year=year, regionbox=ASL_REGION)
 
-
-def main():
-    """Command-line interface to ASL calculation."""
+def parse_args():
+    """Parse command-line arguments for main()"""
 
     parser = argparse.ArgumentParser(prog='asli_calc',
                                      description='Calculates the Amundsen Sea Low from mean sea level pressure fields.')
@@ -307,7 +306,13 @@ def main():
     # parser.add_argument("-p", "--plot", action='store_true', type=bool, help="Outputs a plot of the pressure fields and lows.")
     parser.add_argument("msl_files", nargs="*", type=str, help="Path or glob pattern relative to <datadir> for file(s) containing mean sea level pressure.") # msl files/pattern
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+    """Command-line interface to ASL calculation."""
+
+    args = parse_args()
 
     a = ASLICalculator(args.datadir,
                        args.mask,
