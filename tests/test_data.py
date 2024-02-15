@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 from unittest.mock import patch
 
@@ -5,7 +6,8 @@ import cdsapi
 import pytest
 
 from asli import ASL_REGION
-from asli.data import get_era5_monthly, get_land_sea_mask, _get_request_area
+from asli.data import get_era5_monthly, get_land_sea_mask, \
+    _get_request_area, _cli_data_common_args, _get_cli_lsm_args, _cli_get_era5_monthly
 
 @pytest.mark.parametrize("area,border,expected", 
                          [(None,None,None),
@@ -80,3 +82,34 @@ def test_get_era5_monthly(tmpdir):
     mock_method.assert_called_with('reanalysis-era5-single-levels-monthly-means',
                                     request_params,
                                     output_path)
+    
+
+def test_get_cli_lsm_args():
+
+    # test -e flag
+    with patch("sys.argv", ["_","-e"]):
+        args = _get_cli_lsm_args()
+    
+        assert args.e == True
+        assert args.area_dict == None
+
+    # test area and border parsing
+    test_border = 7.0
+    with patch("sys.argv", ["_","--area", "1", "2", "3", "4", "--border", str(test_border)]):
+        args = _get_cli_lsm_args()
+    
+        assert args.area_dict == {'north': 1,
+                                  'west': 2,
+                                  'south': 3,
+                                  'east': 4}
+        assert args.border == test_border
+
+
+    # test that -e overrides --area
+    with patch("sys.argv", ["_","--area", "1", "2", "3", "4", "-e"]):
+        args = _get_cli_lsm_args()
+
+        assert args.e == True
+        assert args.area_dict == None
+    
+    
