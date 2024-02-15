@@ -146,7 +146,7 @@ def get_land_sea_mask(data_dir: str|Path, filename:str = "era5_lsm.nc", area:dic
 
 def _get_request_area(area:dict, border: float) -> dict:
     if area:
-        logging.info(f"Area of N:{area['north']}, S:{area['south']}, E:{area['east']}, W:{area['west']}specified.")
+        logging.info(f"Area of N:{area['north']}, W:{area['west']}, S:{area['south']}, E:{area['east']}specified.")
         if border==None:
             request_area = area
         else:
@@ -157,7 +157,10 @@ def _get_request_area(area:dict, border: float) -> dict:
                 'east': area['east']+border,
                 'west': area['west']-border
             }
-        logging.info(f"Requesting: N:{request_area['north']}, S:{request_area['south']}, E:{request_area['east']}, W:{request_area['west']}.")
+        logging.info(f"Requesting: N:{area['north']}, W:{area['west']}, S:{area['south']}, E:{area['east']}.")
+        return request_area
+    else:
+        return None
 
 def _cli_get_land_sea_mask():
     """
