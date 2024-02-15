@@ -35,7 +35,7 @@ class CDSDownloader:
             self.output_path)
 
 
-def get_era5_monthly(data_dir: Path, vars:list = ["msl"], start_year: int = 2006, end_year: int = 2023, area: dict = ASL_REGION) -> None:
+def get_era5_monthly(data_dir: Path, vars:list = ["msl"], start_year: int = 2006, end_year: int = 2023, area: dict = ASL_REGION, border:float=None) -> None:
     """
     Download the ERA5 monthly averaged variables from the Climate Data Store (CDS).
     Uses the CDS API and therefore requires CDS account and API key.
@@ -74,8 +74,8 @@ def get_era5_monthly(data_dir: Path, vars:list = ["msl"], start_year: int = 2006
             ],
             'time':'00:00',
             }
-
-    data_downloader = CDSDownloader(data_dir,request_params=request_params, output_filename=f"ERA5/monthly/era5_{'_'.join(variables)}_monthly_{start_year}-{end_year}.nc", area=area)
+    
+    data_downloader = CDSDownloader(data_dir,request_params=request_params, output_filename=f"ERA5/monthly/era5_{'_'.join(variables)}_monthly_{start_year}-{end_year}.nc", area=_get_request_area(area, border))
     data_downloader.download()
 
 
@@ -92,16 +92,11 @@ def _cli_get_era5_monthly():
                                 \n \
                                 Downloads may queue for a considerable time depending on the CDS. \
                                 Request progress can be tracked through your CDS account at: https://cds.climate.copernicus.eu/cdsapp#!/yourrequests')
-    
-    parser.add_argument("-d", "--datadir", default="./data", help="Path to directory in which to put downloaded data. (Default: ./data)")
+    parser = _cli_data_common_args(parser)    
     parser.add_argument("-v", "--vars", nargs='?', default="msl,", help="comma-separated list of strings specifying variables to download. Can be one or more of 'msl' (default), 'tas', 'uas', \
                         'vas' corresponding to 'mean_sea_level_pressure', '2m_temperature', '10m_u_component_of_wind', and '10m_v_component_of_wind', respectively.")
     parser.add_argument("-s", "--start", default=1979, type=int, help="Earliest year to download. (Default: 1979)")
     parser.add_argument("-n", "--end", default=datetime.now().year, type=int, help=f"Latest year to download. (Default: {datetime.now().year})")
-    parser.add_argument("-e", action='store_true', help="Download entire earth. i.e. don't restrict to bounds specified using '-a'.")
-    parser.add_argument("-a", "--area", type=float, nargs='?', default=[ASL_REGION['north'], ASL_REGION['west'], ASL_REGION['south'], ASL_REGION['east']],
-                        help=f"Bounding coordinates for data download. Optional and overridden by '-e' option. \
-                            (Default: bounds of Amundsen Sea: North: {ASL_REGION['north']}, South: {ASL_REGION['south']}, East: {ASL_REGION['east']}, West: {ASL_REGION['west']})")
 
     args = parser.parse_args()
 
@@ -122,7 +117,7 @@ def _cli_get_era5_monthly():
     get_era5_monthly(data_dir=Path(args.datadir), vars=vars, start_year=args.start, end_year=args.end, area=area_dict)
 
 
-def get_land_sea_mask(data_dir: str|Path, filename:str = "era5_lsm.nc", area:dict = ASL_REGION):
+def get_land_sea_mask(data_dir: str|Path, filename:str = "era5_lsm.nc", area:dict = None, border:float = None):
     """
     Download the ERA5 land-sea mask from the Climate Data Store (CDS).
     Uses the CDS API and therefore requires CDS account and API key.
@@ -146,9 +141,23 @@ def get_land_sea_mask(data_dir: str|Path, filename:str = "era5_lsm.nc", area:dic
         'time': '00:00',
         }
     
-    data_downloader = CDSDownloader(data_dir,request_params=request_params, output_filename=filename, area=area)
+    data_downloader = CDSDownloader(data_dir,request_params=request_params, output_filename=filename, area=_get_request_area(area, border))
     data_downloader.download()
 
+def _get_request_area(area:dict, border: float) -> dict:
+    if area:
+        logging.info(f"Area of N:{area['north']}, S:{area['south']}, E:{area['east']}, W:{area['west']}specified.")
+        if border==None:
+            request_area = area
+        else:
+            logging.info(f"Border of {border} specified.")
+            request_area = {
+                'north': area['north']+border,
+                'south': area['south']-border,
+                'east': area['east']+border,
+                'west': area['west']-border
+            }
+        logging.info(f"Requesting: N:{request_area['north']}, S:{request_area['south']}, E:{request_area['east']}, W:{request_area['west']}.")
 
 def _cli_get_land_sea_mask():
     """
@@ -163,19 +172,15 @@ def _cli_get_land_sea_mask():
                                 \n \
                                 Downloads may queue for a considerable time depending on the CDS. \
                                 Request progress can be tracked through your CDS account at: https://cds.climate.copernicus.eu/cdsapp#!/yourrequests')
-    
-    parser.add_argument("-d", "--datadir", default="./data", help="Path to directory in which to put downloaded data. (Default: ./data)")
+    parser = _cli_data_common_args(parser)
     parser.add_argument("-f", "--filename", default="era5_lsm.nc", help="Filename for data once downloaded. (Default: era5_lsm.nc)")
-    parser.add_argument("-e", action='store_true', help="Download entire earth. i.e. don't restrict to bounds specified using '-a'.")
-    parser.add_argument("-a", "--area", type=float, nargs='?', default=[ASL_REGION['north'], ASL_REGION['west'], ASL_REGION['south'], ASL_REGION['east']],
-                        help=f"Bounding coordinates for data download. Optional and overriden by '-e' option. \
-                            (Default: bounds of Amundsen Sea: North: {ASL_REGION['north']}, South: {ASL_REGION['south']}, East: {ASL_REGION['east']}, West: {ASL_REGION['west']})")
 
     args = parser.parse_args()
 
     if args.e == True:
         logging.info("'-e' flag specified. Will download whole Earth.")
         area_dict = None
+        border = None
     else:
         area_dict = {
             'north': args.area_bounds[0],
@@ -183,5 +188,19 @@ def _cli_get_land_sea_mask():
             'south': args.area_bounds[2],
             'east': args.area_bounds[3],
         }
+        border=args.border
 
-    get_land_sea_mask(data_dir=Path(args.datadir), filename=args.filename, area=area_dict)
+    get_land_sea_mask(data_dir=Path(args.datadir), filename=args.filename, area=area_dict, border=border)
+
+
+def _cli_data_common_args(parser:argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Adds options that are common to the data download CLIs"""
+
+    parser.add_argument("-d", "--datadir", default="./data", help="Path to directory in which to put downloaded data. (Default: ./data)")
+    parser.add_argument("-e", action='store_true', help="Download entire earth. i.e. don't restrict to bounds specified using '-a'.")
+    parser.add_argument("-a", "--area", type=float, nargs='?', default=[ASL_REGION['north'], ASL_REGION['west'], ASL_REGION['south'], ASL_REGION['east']],
+                        help=f"Bounding coordinates for data download. Optional and overriden by '-e' option. \
+                            (Default: bounds of Amundsen Sea: North: {ASL_REGION['north']}, South: {ASL_REGION['south']}, East: {ASL_REGION['east']}, West: {ASL_REGION['west']})")
+    parser.add_argument("-b", "--border", type=float, nargs="?", default=0.0, help="Additional border around <area> to download in degrees")
+
+    return parser
