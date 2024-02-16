@@ -166,6 +166,11 @@ def _cli_get_land_sea_mask():
     """
     CLI for get_land_sea_mask, designed to be used via package entrypoint
     """
+
+    args = _get_cli_lsm_args()
+    get_land_sea_mask(data_dir=Path(args.datadir), filename=args.filename, area=args.area_dict, border=args.border)
+
+def _get_cli_lsm_args():
     parser = argparse.ArgumentParser(
                     prog='asli_data_lsm',
                     description='Downloads the ERA5 land-sea mask from the Climate Data Store (CDS). \
@@ -182,28 +187,26 @@ def _cli_get_land_sea_mask():
 
     if args.e == True:
         logging.info("'-e' flag specified. Will download whole Earth.")
-        area_dict = None
-        border = None
+        args.area_dict = None
+        args.border = None
     else:
-        area_dict = {
-            'north': args.area_bounds[0],
-            'west': args.area_bounds[1],
-            'south': args.area_bounds[2],
-            'east': args.area_bounds[3],
+        args.area_dict = {
+            'north': args.area[0],
+            'west': args.area[1],
+            'south': args.area[2],
+            'east': args.area[3],
         }
-        border=args.border
 
-    get_land_sea_mask(data_dir=Path(args.datadir), filename=args.filename, area=area_dict, border=border)
-
+    return args
 
 def _cli_data_common_args(parser:argparse.ArgumentParser) -> argparse.ArgumentParser:
     """Adds options that are common to the data download CLIs"""
 
     parser.add_argument("-d", "--datadir", default="./data", help="Path to directory in which to put downloaded data. (Default: ./data)")
     parser.add_argument("-e", action='store_true', help="Download entire earth. i.e. don't restrict to bounds specified using '-a'.")
-    parser.add_argument("-a", "--area", type=float, nargs='?', default=[ASL_REGION['north'], ASL_REGION['west'], ASL_REGION['south'], ASL_REGION['east']],
-                        help=f"Bounding coordinates for data download. Optional and overriden by '-e' option. \
-                            (Default: bounds of Amundsen Sea: North: {ASL_REGION['north']}, South: {ASL_REGION['south']}, East: {ASL_REGION['east']}, West: {ASL_REGION['west']})")
+    parser.add_argument("-a", "--area", type=float, nargs=4, default=[ASL_REGION['north'], ASL_REGION['west'], ASL_REGION['south'], ASL_REGION['east']],
+                        help=f"Bounding coordinates for data download: N W S E. Optional. Overridden by '-e' option. \
+                            (Default: bounds of Amundsen Sea: North: {ASL_REGION['north']}, West: {ASL_REGION['west']}, South: {ASL_REGION['south']}, East: {ASL_REGION['east']})")
     parser.add_argument("-b", "--border", type=float, nargs="?", default=0.0, help="Additional border around <area> to download in degrees")
 
     return parser
