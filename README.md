@@ -22,4 +22,79 @@ If using the `asli` package please cite both this repository (see "Cite this rep
 
 ### Installation
 
-Using pip: `pip install git+https://github.com/scotthosking/amundsen-sea-low-index`
+We advise installing this package and its dependencies in a python virtual environment using a tool such as [venv](https://docs.python.org/3/library/venv.html) or [conda](https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-python) (other virtual environment managers are available).
+
+Install the package from GitHub using pip: `pip install git+https://github.com/scotthosking/amundsen-sea-low-index`
+
+### Downloading data
+Command-line utilities are provided as a convenient way to download the datasets required for this analysis.
+
++ `asli_data_lsm` downloads land-sea mask ERA5 data.
++ `asli_data_era5` downloads certain variables from ERA5, by default `mean_sea_level_pressure`.
+
+The `--help` flags can be used to find out more information, e.g.
+
+```sh
+asli_data_lsm --help
+```
+
+Alternatively, using the python interface:
+
+```py
+from asli.data import get_land_sea_mask, get_era5_monthly
+
+help(get_land_sea_mask)
+...
+
+help(get_era5_monthly)
+...
+```
+
+### Running calculations
+A command-line utility is also provided for performing the basic calculations, with a similar help flag:
+
+```sh
+asli_calc --help
+```
+
+Alternatively, using the python interface, import the package and create an instance of the `ASLICalculator` class, initialising with the locations of the land-sea mask and mean sea level pressure data:
+
+```py
+import asli
+a = asli.ASLICalculator(data_dir="./data/", 
+                   mask_filename="era5_lsm.nc",
+                   msl_pattern="ERA5/monthly/era5_mean_sea_level_pressure_monthly_1988.nc"
+                   )
+```
+
+then read in the data and perform the calculation:
+
+```py
+a.read_mask_data()
+a.read_msl_data()
+a.calculate()
+```
+
+### Outputting data as a csv file and plotting
+Once the calculations are done, we can write out the dataframe to a csv file, providing the filename:
+
+```py
+a.to_csv('asl.csv')
+```
+
+Basic plots of the pressure fields and lows can be made using the `plot_region_all()` and `plot_region_year()` methods.
+
+```py
+a.plot_region_all()
+```
+
+### Getting help
+Most of the package has docstrings in the source code, so try running `help()` on any of the functions, classes or their methods, e.g. `help(asli.ASLICalculator)`.
+
+
+## Contributing
+We welcome contributions and improvements to this package!
+
+Please submit bug reports and feature requests [on the GitHub repo](https://github.com/scotthosking/amundsen-sea-low-index/issues/new).
+
+For source code contributions (even just to the readme or documentation) please fork the repo on GitHub, make your changes there and open a pull request against this repository.
