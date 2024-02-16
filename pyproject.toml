@@ -41,6 +41,9 @@ tests = [
 docs = [
     "jupyter-book"
 ]
+dev = [
+    "ruff"
+]
 
 [project.scripts]
 asli_data_lsm = "asli:data._cli_get_land_sea_mask"

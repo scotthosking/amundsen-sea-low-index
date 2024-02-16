@@ -1,10 +1,12 @@
 import contextlib
 import joblib
 
+
 # https://stackoverflow.com/questions/24983493/tracking-progress-of-joblib-parallel-execution
 @contextlib.contextmanager
 def tqdm_joblib(tqdm_object):
     """Context manager to patch joblib to report into tqdm progress bar given as argument"""
+
     class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
         def __call__(self, *args, **kwargs):
             tqdm_object.update(n=self.batch_size)
