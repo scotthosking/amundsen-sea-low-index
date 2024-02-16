@@ -16,17 +16,18 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent"
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
+    "cdsapi",
+    "cartopy",
+    "dask",
+    "joblib",
+    "matplotlib",
+    "netcdf4",
     "numpy",
-    "xarray",
     "pandas",
     "scikit-image",
-    "matplotlib",
-    "cartopy",
-    "netcdf4",
-    "dask",
-    "cdsapi"
+    "xarray",
 ]
 
 [project.urls]
