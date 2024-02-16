@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import random
 import unittest
 from unittest.mock import patch
 
@@ -38,7 +39,7 @@ class TestCDSDownloader(unittest.TestCase):
         if not os.path.exists(self.cdsapirc_path):
             self.created_temp_cdsapirc_file = True
             with open(self.cdsapirc_path, 'w') as f:
-                f.writelines(['\n', 'url: https://cds.climate.copernicus.eu/api/v2\n', 'key: dummy-key\n', '\n'])
+                f.writelines(['\n', 'url: https://cds.climate.copernicus.eu/api/v2\n', 'key: 123456:some-dummy-key\n', '\n'])
         else:
             self.created_temp_cdsapirc_file = False
 
