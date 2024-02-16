@@ -46,7 +46,7 @@ def get_era5_monthly(data_dir: str, vars:list = ["msl"], start_year: int = 2006,
     Request progress can be tracked through your CDS account at: https://cds.climate.copernicus.eu/cdsapp#!/yourrequests
 
     data_dir(str): path of data directory
-    vars (Sequence[str]): list of strings specifying variables to download. Can be one or more of "msl" (default), "tas", "uas", 
+    vars (Sequence[str]): list of strings specifying variables to download. Can be one or more of "msl" (default), "tas", "uas", \
         "vas" corresponding to "mean_sea_level_pressure", "2m_temperature", "10m_u_component_of_wind", and "10m_v_component_of_wind, respectively.
     start_year(int): earliest year of data to download
     start_year(int): latest year of data to download

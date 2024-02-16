@@ -36,7 +36,10 @@ Bug_Tracker = "https://github.com/scotthosking/amundsen-sea-low-index/issues"
 
 [project.optional-dependencies]
 tests = [
-  "pytest"
+    "pytest"
+]
+docs = [
+    "jupyter-book"
 ]
 
 [project.scripts]
