@@ -35,7 +35,7 @@ class CDSDownloader:
             self.output_path)
 
 
-def get_era5_monthly(data_dir: Path, vars:list = ["msl"], start_year: int = 2006, end_year: int = 2023, area: dict = ASL_REGION, border:float=None) -> None:
+def get_era5_monthly(data_dir: str, vars:list = ["msl"], start_year: int = 2006, end_year: int = 2023, area: dict = ASL_REGION, border:float=None) -> None:
     """
     Download the ERA5 monthly averaged variables from the Climate Data Store (CDS).
     Uses the CDS API and therefore requires CDS account and API key.
@@ -45,7 +45,7 @@ def get_era5_monthly(data_dir: Path, vars:list = ["msl"], start_year: int = 2006
     Downloads may queue for a considerable time depending on the CDS.
     Request progress can be tracked through your CDS account at: https://cds.climate.copernicus.eu/cdsapp#!/yourrequests
 
-    data_dir(str|Path): path of data directory
+    data_dir(str): path of data directory
     vars (Sequence[str]): list of strings specifying variables to download. Can be one or more of "msl" (default), "tas", "uas", 
         "vas" corresponding to "mean_sea_level_pressure", "2m_temperature", "10m_u_component_of_wind", and "10m_v_component_of_wind, respectively.
     start_year(int): earliest year of data to download
@@ -117,7 +117,7 @@ def _cli_get_era5_monthly():
     get_era5_monthly(data_dir=Path(args.datadir), vars=vars, start_year=args.start, end_year=args.end, area=area_dict)
 
 
-def get_land_sea_mask(data_dir: str|Path, filename:str = "era5_lsm.nc", area:dict = None, border:float = None):
+def get_land_sea_mask(data_dir: str, filename:str = "era5_lsm.nc", area:dict = None, border:float = None):
     """
     Download the ERA5 land-sea mask from the Climate Data Store (CDS).
     Uses the CDS API and therefore requires CDS account and API key.
@@ -128,7 +128,7 @@ def get_land_sea_mask(data_dir: str|Path, filename:str = "era5_lsm.nc", area:dic
     Request progress can be tracked through your CDS account at: https://cds.climate.copernicus.eu/cdsapp#!/yourrequests
 
     Params
-    data_dir(str|Path): path of data directory
+    data_dir(str): path of data directory
     area(dict): either dictionary containing keys 'north', 'south', 'east', 'west' bounding coordinates of area to download (default) or None.
     """
 
