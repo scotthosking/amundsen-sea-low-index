@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asli"
+version = "0.0.1"
+authors = [
+    {name = "J. Scott Hosking", email="jshosking@gmail.com"},
+    {name = "David Wilby", email="dalby@bas.ac.uk"}
+]
+description = "Amundsen Sea Low detection from mean sea level pressure fields."
+readme = "README.md"
+license = {text="MIT License"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+requires-python = ">=3.9"
+dependencies = [
+    "cdsapi",
+    "cartopy",
+    "dask",
+    "joblib",
+    "matplotlib",
+    "netcdf4",
+    "numpy",
+    "pandas",
+    "scikit-image",
+    "xarray",
+]
+
+[project.urls]
+Source = "https://github.com/scotthosking/amundsen-sea-low-index"
+Bug_Tracker = "https://github.com/scotthosking/amundsen-sea-low-index/issues"
+
+[project.optional-dependencies]
+tests = [
+    "pytest"
+]
+docs = [
+    "jupyter-book"
+]
+dev = [
+    "ruff"
+]
+
+[project.scripts]
+asli_data_lsm = "asli:data._cli_get_land_sea_mask"
+asli_data_era5 = "asli:data._cli_get_era5_monthly"
+asli_calc = "asli:asli.main"
