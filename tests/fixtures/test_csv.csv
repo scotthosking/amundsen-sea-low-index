@@ -1,4 +1,4 @@
-# id: asli_3.20240813_20250131
+# id: asli_3.20240813_20260714
 # title: Amundsen Sea Low (ASL) Index
 # keywords: ATMOSPHERIC PRESSURE
 #: SEA LEVEL PRESSURE
@@ -14,7 +14,7 @@
 # authors: Dr J. Scott Hosking
 # institution: BAS (British Antarctic Survey).
 # creator_url: https://orcid.org/0000-0002-3646-3504
-# geospatial_lat_min: -80.0 (degree) 
+# geospatial_lat_min: -80.0 (degree)
 # geospatial_lat_max: -60.0 (degree)
 # geospatial_lon_min: -62.0 (degree)
 # geospatial_lon_max: 170.0 (degree)
@@ -22,16 +22,17 @@
 # Conventions: ACDD-1.3
 #: CF-1.12
 #: UCUM-2.2
-# time_coverage_start: 2024-01-01
-# time_coverage_end: 2024-11-01
-# source: asli 0.0.1
+# time_coverage_start: 1959-01-01
+# time_coverage_end: 2025-12-01
+# source: asli 0.2.7
 # product_version: 3.20240813
-# date_created: 20250131
+# date_created: 20260714
 # references: 10.24381/cds.adbb2d47
 # [a]: Area-average sea level pressure over sector
 # [b]: Relative central pressure (actual_central_pressure 'minus' sector_pressure)
 # [c]: ERA5 (final data) or ERA5T (initial release data) from ECMWF
-time (mo),longitude (degree),latitude (degree),actual_central_pressure (hPA),sector_pressure (hPA) [a],relative_central_pressure (hPA) [b],data_source [c]
+# [d]: There is a known ERA5 issue which affects pressure values and ASL location for May - October 1996. For details please consult https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation#ERA5:datadocumentation-Knownissues number 30.
+time (mo),longitude (degree),latitude (degree),actual_central_pressure (hPa),sector_pressure (hPa) [a],relative_central_pressure (hPa) [b],data_source [c] [d]
 2024-01-01,201.5,-74.75,979.075,985.1078,-6.032776,ERA5
 2024-02-01,258.75,-70.0,976.85626,981.9796,-5.123352,ERA5
 2024-03-01,190.75,-71.25,975.32623,987.18774,-11.861511,ERA5

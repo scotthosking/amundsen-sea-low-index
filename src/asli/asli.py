@@ -463,14 +463,14 @@ class ASLICalculator:
             self.minima_df.to_csv(f, index=False, header=None)
 
     def import_from_csv(
-        self, filepath: Union[str, Path], header: int = 33, force: bool = False
+        self, filepath: Union[str, Path], header: int = 34, force: bool = False
     ):
         """
         Import a csv file exported from the .export_df method, for example to plot data from a previous session.
 
         Args:
             filepath (str|Path, required): Path to csv file containing data produced by this package.
-            header (int, optional): number of header rows in csv. Default: 33
+            header (int, optional): number of header rows in csv. Default: 34
             force (bool, optional): Overwrite existing calculations in this object. Defaults to False.
         """
         if self.minima_df is not None and not force:
